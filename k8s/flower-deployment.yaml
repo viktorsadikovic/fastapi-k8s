@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: flower
+  name: flower
+spec:
+  selector:
+    matchLabels:
+      app: flower
+  template:
+    metadata:
+      labels:
+        app: flower
+    spec:
+      containers:
+      - name: flower
+        image: mher/flower
+        env:
+          - name: CELERY_BROKER_URL
+            valueFrom:
+              configMapKeyRef:
+                name: flower-configmap
+                key: CELERY_BROKER_URL
+          - name: FLOWER_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: flower-configmap
+                key: FLOWER_PORT
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 5555

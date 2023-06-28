@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: celeryworker
+  name: celeryworker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celeryworker
+  template:
+    metadata:
+      labels:
+        app: celeryworker
+    spec:
+      containers:
+      - image: atanastrpceski/fastapi-worker
+        name: celeryworker
+        env:
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: SECRET_KEY
+          - name: POSTGRES_SERVER
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: POSTGRES_SERVER
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: POSTGRES_PASSWORD
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: POSTGRES_DB
+          - name: FIRST_SUPERUSER
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: FIRST_SUPERUSER
+          - name: FIRST_SUPERUSER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: FIRST_SUPERUSER_PASSWORD
+          - name: PROJECT_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: PROJECT_NAME
+          - name: SERVER_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: SERVER_NAME
+          - name: SMTP_TLS
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: SMTP_TLS
+          - name: SMTP_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: SMTP_PORT
+          - name: SMTP_HOST
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: SMTP_HOST
+          - name: SMTP_USER
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: SMTP_USER
+          - name: SMTP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: backend-secret
+                key: SMTP_PASSWORD
+          - name: EMAILS_FROM_EMAIL
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: EMAILS_FROM_EMAIL
+          - name: EMAILS_FROM_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: EMAILS_FROM_NAME
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"

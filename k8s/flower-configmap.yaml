@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flower-configmap
+data:
+  CELERY_BROKER_URL: amqp://guest:guest@queue//
+  FLOWER_PORT: '5555'

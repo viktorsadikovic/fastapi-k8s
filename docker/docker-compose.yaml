@@ -1,0 +1,93 @@
+version: "3.7"
+services:
+
+  backend: # Expose it to the outside world
+    image: atanastrpceski/fastapi
+    depends_on:
+      - db
+    environment:
+      - SECRET_KEY=JeNYe4eAv78-S7kWAx0fFSBPU0VDg_X0g1KIjRWlPzM
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=boilerplate
+      - FIRST_SUPERUSER=admin@example.com
+      - FIRST_SUPERUSER_PASSWORD=mysecretpassword
+      - PROJECT_NAME=FastAPI
+      - SERVER_NAME=Local
+      - SMTP_TLS=false
+      - SMTP_PORT=1025
+      - SMTP_HOST=mailhog
+      - SMTP_USER=admin@example.com
+      - SMTP_PASSWORD=mysecretpassword
+      - EMAILS_FROM_EMAIL=admin@example.com
+      - EMAILS_FROM_NAME=admin
+    ports:
+      - 8000:80
+
+  celeryworker:
+    image: atanastrpceski/fastapi-worker
+    depends_on:
+      - db
+      - queue
+    environment:
+      - SECRET_KEY=JeNYe4eAv78-S7kWAx0fFSBPU0VDg_X0g1KIjRWlPzM
+      - POSTGRES_SERVER=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=boilerplate
+      - FIRST_SUPERUSER=admin@example.com
+      - FIRST_SUPERUSER_PASSWORD=mysecretpassword
+      - PROJECT_NAME=FastAPI
+      - SERVER_NAME=Local
+      - SMTP_TLS=false
+      - SMTP_PORT=1025
+      - SMTP_HOST=mailhog
+      - SMTP_USER=admin@example.com
+      - SMTP_PASSWORD=mysecretpassword
+      - EMAILS_FROM_EMAIL=admin@example.com
+      - EMAILS_FROM_NAME=admin
+
+  db:
+    image: postgres:13.4
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data/pgdata:z
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=db
+    ports:
+      - 5432:5432
+    restart: always
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  adminer: # Expose it to the outside world
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  queue:
+    image: rabbitmq:3-management
+
+  flower: # Expose it to the outside world
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@queue// # the service name is "queue"
+      - FLOWER_PORT=5555
+    ports:
+      - 5555:5555
+    depends_on:
+      - queue
+      
+  mailhog: # Expose it to the outside world
+    image: mailhog/mailhog
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
